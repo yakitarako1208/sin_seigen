@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>スマホ対応 p5.js ルーレット</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+</head>
+<body>
+    <script>
+        let themes = [
+            "大股で歩く", "スキップしながら進め", "英語縛り", "お題を見つけるたびオリジナルのハンドシェイク", 
+            "スマホを２人で持つ", "背中合わせで動け", "二人三脚", "ピースしながら歩け", 
+            "ずっと片腕を上げながら進め", "常に横を向いて進め"
+        ];
+        
+        let angle = 0;
+        let speed = 0;
+        let spinning = false;
+        let selectedTheme = "";
+        let wheelSize;
+        
+        function setup() {
+            createCanvas(windowWidth, windowHeight);
+            textAlign(CENTER, CENTER);
+            wheelSize = min(windowWidth, windowHeight) * 0.8; // スマホ対応のサイズ
+        }
+        
+        function draw() {
+            background(255);
+            translate(width / 2, height / 2);
+            let angleStep = TWO_PI / themes.length;
+            let textRadius = wheelSize / 3;
+            textSize(wheelSize / 25);
+            
+            for (let i = 0; i < themes.length; i++) {
+                let startAngle = i * angleStep + angle;
+                fill(i % 2 === 0 ? color(30, 30, 60) : color(80, 80, 120));
+                arc(0, 0, wheelSize, wheelSize, startAngle, startAngle + angleStep, PIE);
+                
+                fill(255);
+                let x = textRadius * cos(startAngle + angleStep / 2);
+                let y = textRadius * sin(startAngle + angleStep / 2);
+                text(themes[i], x, y);
+            }
+            
+            drawShuriken(0, -wheelSize / 2 - 30, 20);
+            
+            if (spinning) {
+                angle += speed;
+                speed *= 0.98;
+                if (speed < 0.01) {
+                    spinning = false;
+                    let selected = Math.floor(((TWO_PI - angle % TWO_PI) / angleStep) % themes.length);
+                    selectedTheme = themes[selected];
+                }
+            }
+            
+            if (!spinning && selectedTheme !== "") {
+                fill(0);
+                textSize(wheelSize / 12);
+                text("お題: " + selectedTheme, 0, wheelSize / 2 + 50);
+            }
+        }
+        
+        function mousePressed() {
+            if (!spinning) {
+                speed = random(0.2, 0.5);
+                spinning = true;
+                selectedTheme = "";
+            }
+        }
+        
+        function drawShuriken(x, y, size) {
+            push();
+            translate(x, y);
+            fill(0);
+            noStroke();
+            for (let i = 0; i < 4; i++) {
+                triangle(-size, -size / 2, -size, size / 2, size, 0);
+                rotate(PI / 2);
+            }
+            pop();
+        }
+    </script>
+</body>
+</html>
